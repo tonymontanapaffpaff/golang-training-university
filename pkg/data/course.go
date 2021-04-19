@@ -47,12 +47,12 @@ func (u CourseData) ReadAll() ([]Course, error) {
 	return courses, nil
 }
 
-func (u CourseData) ChangeDescription(id int, description string) (int, error) {
-	result := u.db.Find(&Course{}, id).Update("description", description)
+func (u CourseData) ChangeDescription(code int, description string) (int, error) {
+	result := u.db.Model(Course{}).Where("code = ?", code).Update("description", description)
 	if result.Error != nil {
 		return -1, fmt.Errorf("can't update course description, error: %w", result.Error)
 	}
-	return id, nil
+	return code, nil
 }
 
 func (u CourseData) Delete(code int) error {

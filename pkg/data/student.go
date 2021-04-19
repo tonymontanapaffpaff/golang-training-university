@@ -48,19 +48,10 @@ func (u StudentData) ReadAll() ([]Student, error) {
 }
 
 func (u StudentData) ChangeStatus(id int) (int, error) {
-	var student Student
-	result := u.db.Find(&student, id)
+	result := u.db.Exec("UPDATE students SET is_active = NOT is_active WHERE id = ?", id)
 	if result.Error != nil {
 		return -1, fmt.Errorf("can't update student status, error: %w", result.Error)
 	}
-
-	if student.IsActive {
-		student.IsActive = false
-	} else {
-		student.IsActive = true
-	}
-
-	u.db.Save(&student)
 	return id, nil
 }
 

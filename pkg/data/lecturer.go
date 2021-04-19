@@ -48,7 +48,7 @@ func (u LecturerData) ReadAll() ([]Lecturer, error) {
 }
 
 func (u LecturerData) ChangeFullName(id int, firstName, lastName string) (int, error) {
-	result := u.db.Find(&Department{}, id).Update("first_name", firstName).Update("last_name", lastName)
+	result := u.db.Model(Lecturer{}).Where("id = ?", id).Updates(Lecturer{FirstName: firstName, LastName: lastName})
 	if result.Error != nil {
 		return -1, fmt.Errorf("can't update name, error: %w", result.Error)
 	}

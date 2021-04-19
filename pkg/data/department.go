@@ -45,12 +45,12 @@ func (u DepartmentData) ReadAll() ([]Department, error) {
 	return departments, nil
 }
 
-func (u DepartmentData) ChangeName(id int, name string) (int, error) {
-	result := u.db.Find(&Department{}, id).Update("name", name)
+func (u DepartmentData) ChangeName(code int, name string) (int, error) {
+	result := u.db.Model(Department{}).Where("code = ", code).Update("name", name)
 	if result.Error != nil {
 		return -1, fmt.Errorf("can't update name, error: %w", result.Error)
 	}
-	return id, nil
+	return code, nil
 }
 
 func (u DepartmentData) Delete(code int) error {

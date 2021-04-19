@@ -52,7 +52,7 @@ func main() {
 	//	LastName:  "Kuzma",
 	//	IsActive:  false,
 	//}
-	//
+
 	//id, err := studentData.Add(newStudent)
 	//if err != nil {
 	//	log.Println(err)
@@ -65,46 +65,46 @@ func main() {
 	//}
 	//fmt.Println("Successfully deletion")
 
-	students, err := studentData.ReadAll()
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(students)
-
-	student, err := studentData.Read(20174201)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Searching result:", student)
-
-	//changedUserId, err := studentData.ChangeStatus(student.Id)
+	//students, err := studentData.ReadAll()
 	//if err != nil {
 	//	log.Println(err)
 	//}
-	//log.Printf("Student status with id=%d is changed\n", changedUserId)
+	//log.Println(students)
+	//
+	//student, err := studentData.Read(20174201)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//log.Println("Searching result:", student)
 
-	currentRate, err := studentData.GetCurrentRate(student.Id)
+	changedUserId, err := studentData.ChangeStatus(20174201)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Printf("Current rate for student with id=%d: %v\n", student.Id, currentRate)
+	log.Printf("Student status with id=%d is changed\n", changedUserId)
 
-	coursesList, err := studentData.GetCoursesList(student.Id)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("List of courses for student with id=%d: %v\n", student.Id, coursesList)
-
-	courseData := data.NewCourseData(conn)
-	courses, err := courseData.ReadAll()
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("List of courses: %v\n", courses)
-
-	departmentName, err := courseData.GetDepartmentName(202)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("Department name for course with code=%d: %v\n", 202, departmentName)
+	//currentRate, err := studentData.GetCurrentRate(student.Id)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//log.Printf("Current rate for student with id=%d: %v\n", student.Id, currentRate)
+	//
+	//coursesList, err := studentData.GetCoursesList(student.Id)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//log.Printf("List of courses for student with id=%d: %v\n", student.Id, coursesList)
+	//
+	//courseData := data.NewCourseData(conn)
+	//courses, err := courseData.ReadAll()
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//log.Printf("List of courses: %v\n", courses)
+	//
+	//departmentName, err := courseData.GetDepartmentName(202)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//log.Printf("Department name for course with code=%d: %v\n", 202, departmentName)
 }
