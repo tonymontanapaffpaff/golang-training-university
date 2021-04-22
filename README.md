@@ -12,4 +12,5 @@ Path | Method | Description | Body example
 1. Specify database and host data in the configuration file.
 2. Run application with command: `go run main.go`
 ## Unit tests
-```go test -race```
+```go test -race
+```
