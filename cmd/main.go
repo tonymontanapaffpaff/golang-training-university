@@ -2,109 +2,36 @@ package main
 
 import (
 	"log"
-	"os"
+	"net"
+	"net/http"
 
-	"github.com/golang-training-university/pkg/data"
-	"github.com/golang-training-university/pkg/db"
+	"github.com/tonymontanapaffpaff/golang-training-university/config"
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/api"
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/data"
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/db"
+
+	"github.com/gorilla/mux"
 )
-
-var (
-	host     = os.Getenv("DB_USERS_HOST")
-	port     = os.Getenv("DB_USERS_PORT")
-	user     = os.Getenv("DB_USERS_USER")
-	dbname   = os.Getenv("DB_USERS_DBNAME")
-	password = os.Getenv("DB_USERS_PASSWORD")
-	sslmode  = os.Getenv("DB_USERS_SSL")
-)
-
-func init() {
-	if host == "" {
-		host = "localhost"
-	}
-	if port == "" {
-		port = "5432"
-	}
-	if user == "" {
-		user = "postgres"
-	}
-	if dbname == "" {
-		dbname = "university"
-	}
-	if password == "" {
-		password = "postgres"
-	}
-	if sslmode == "" {
-		sslmode = "disable"
-	}
-}
 
 func main() {
-	conn, err := db.GetConnection(host, port, user, dbname, password, sslmode)
+	appConfig := config.GetConfig()
+	conn, err := db.GetConnection(appConfig)
 	if err != nil {
 		log.Fatalf("can't connect to database, error: %v", err)
 	}
 
-	studentData := data.NewStudentData(conn)
+	r := mux.NewRouter()
+	courseData := data.NewCourseData(conn)
+	api.ServeCourseResource(r, *courseData)
+	r.Use(mux.CORSMethodMiddleware(r))
 
-	//newStudent := data.Student{
-	//	Id:        20211101,
-	//	FirstName: "Kyle",
-	//	LastName:  "Kuzma",
-	//	IsActive:  false,
-	//}
-
-	//id, err := studentData.Add(newStudent)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//fmt.Println("Inserted newStudent id is:", id)
-	//
-	//err = studentData.Delete(20211101)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//fmt.Println("Successfully deletion")
-
-	//students, err := studentData.ReadAll()
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println(students)
-	//
-	//student, err := studentData.Read(20174201)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println("Searching result:", student)
-
-	changedUserId, err := studentData.ChangeStatus(20174201)
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		log.Println(err)
+		log.Fatal("Server Listen port...")
 	}
-	log.Printf("Student status with id=%d is changed\n", changedUserId)
 
-	//currentRate, err := studentData.GetCurrentRate(student.Id)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Printf("Current rate for student with id=%d: %v\n", student.Id, currentRate)
-	//
-	//coursesList, err := studentData.GetCoursesList(student.Id)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Printf("List of courses for student with id=%d: %v\n", student.Id, coursesList)
-	//
-	//courseData := data.NewCourseData(conn)
-	//courses, err := courseData.ReadAll()
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Printf("List of courses: %v\n", courses)
-	//
-	//departmentName, err := courseData.GetDepartmentName(202)
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//log.Printf("Department name for course with code=%d: %v\n", 202, departmentName)
+	err = http.Serve(listener, r)
+	if err != nil {
+		log.Fatal("Server has been crashed...")
+	}
 }
