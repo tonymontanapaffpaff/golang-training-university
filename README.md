@@ -1,5 +1,5 @@
 ## Description
-
+A small application representing CRUD operations on a university database.
 ## Paths table
 Path | Method | Description | Body example
 --- | --- | --- | ---
