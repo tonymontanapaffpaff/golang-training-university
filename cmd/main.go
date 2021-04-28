@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/golang-training-university/pkg/data"
-	"github.com/golang-training-university/pkg/db"
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/data"
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/db"
 )
 
 var (
