@@ -1,7 +1,7 @@
 ## Task 3
 
 #### Schema:
-![alt text](https://github.com/tonymontanapaffpaff/golang-training-university/blob/task_1/schema.png?raw=true)
+![alt text](https://github.com/tonymontanapaffpaff/golang-training-university/blob/task_3/schema.png?raw=true)
 
 ## Description
 
