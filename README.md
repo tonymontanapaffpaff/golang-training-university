@@ -47,6 +47,7 @@ A small application representing CRUD operations on a university database.
 <td></td>
 </tr>
 </table>
+
 ## How to run  
 1. Specify your database and host data in the configuration file: `/config/home_config.json`
 2. Run application with command: `go run main.go`
