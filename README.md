@@ -17,22 +17,22 @@ A small application representing CRUD operations on a university database.
 ```json
 [
   {
-  "Code":207,
-  "Title":"Mobile Application Development",
-  "DepartmentCode":5,
-  "Description":"Mobile Application Development course description..."
+    "Code":207,
+    "Title":"Mobile Application Development",
+    "DepartmentCode":5,
+    "Description":"Mobile Application Development course description..."
   },
   {
-  "Code":208,
-  "Title":"Java Web Development",
-  "DepartmentCode":5,
-  "Description":"Java Web Development course description..."
+    "Code":208,
+    "Title":"Java Web Development",
+    "DepartmentCode":5,
+    "Description":"Java Web Development course description..."
   },
   {
-  "Code":209,
-  "Title":"Architecture Operating Systems",
-  "DepartmentCode":5,
-  "Description":"Architecture Operating Systems course description..."
+    "Code":209,
+    "Title":"Architecture Operating Systems",
+    "DepartmentCode":5,
+    "Description":"Architecture Operating Systems course description..."
   }
 ]
 ```
