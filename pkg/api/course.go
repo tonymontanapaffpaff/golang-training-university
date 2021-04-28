@@ -30,6 +30,7 @@ func (a courseAPI) getAllCourses(writer http.ResponseWriter, request *http.Reque
 		_, err := writer.Write([]byte("got an error when tried to get list of courses"))
 		if err != nil {
 			log.Println(err)
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
@@ -48,6 +49,7 @@ func (a courseAPI) getCourse(writer http.ResponseWriter, request *http.Request) 
 		_, err := writer.Write([]byte("course code must be a number"))
 		if err != nil {
 			log.Println(err)
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
@@ -56,6 +58,7 @@ func (a courseAPI) getCourse(writer http.ResponseWriter, request *http.Request) 
 		_, err := writer.Write([]byte("got an error when tried to get course"))
 		if err != nil {
 			log.Println(err)
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
@@ -71,12 +74,12 @@ func (a courseAPI) createCourse(writer http.ResponseWriter, request *http.Reques
 	course := new(data.Course)
 	err := json.NewDecoder(request.Body).Decode(&course)
 	if err != nil {
-		log.Printf("failed reading JSON: %s\n", err)
+		log.Printf("failed reading JSON: %s", err)
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if course == nil {
-		log.Printf("failed empty JSON\n")
+		log.Println("failed empty JSON")
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -96,18 +99,19 @@ func (a courseAPI) updateCourseDescription(writer http.ResponseWriter, request *
 		_, err := writer.Write([]byte("course code must be a number"))
 		if err != nil {
 			log.Println(err)
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
 	var description string
 	err = json.NewDecoder(request.Body).Decode(&description)
 	if err != nil {
-		log.Printf("failed reading JSON: %s\n", err)
+		log.Printf("failed reading JSON: %s", err)
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if description == "" {
-		log.Printf("empty data\n")
+		log.Println("empty data")
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -127,6 +131,7 @@ func (a courseAPI) deleteCourse(writer http.ResponseWriter, request *http.Reques
 		_, err := writer.Write([]byte("course code must be a number"))
 		if err != nil {
 			log.Println(err)
+			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
