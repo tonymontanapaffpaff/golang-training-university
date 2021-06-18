@@ -1,22 +1,20 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/tonymontanapaffpaff/golang-training-university/config"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetConnection(config config.Configuration) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		config.Host, config.Port, config.User, config.DBName, config.Password, config.SSLMode)
-
-	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func GetClient(ctx context.Context, dbUser, dbPassword, dbHost, dbPort string) (*mongo.Client, error) {
+	//client, err := mongo.Connect(ctx, options.Client().ApplyURI(
+	//	fmt.Sprintf("mongodb://%v:%v@%v:%v/?sslmode=disable", dbUser, dbPassword, dbHost, dbPort)))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
+		fmt.Sprintf("mongodb://%v:%v", dbHost, dbPort)))
 	if err != nil {
-		return nil, fmt.Errorf("got an error when tried to make connection with database:%w", err)
+		return nil, fmt.Errorf("can't connect to database, error: %v", err)
 	}
-
-	return connection, nil
+	return client, nil
 }

@@ -1,8 +1,0 @@
-{
-  "Host": "localhost",
-  "Port": "5432",
-  "User": "postgres",
-  "DBName": "university",
-  "Password": "postgres",
-  "SSLMode": "disable"
-}

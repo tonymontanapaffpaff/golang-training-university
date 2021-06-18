@@ -1,77 +1,108 @@
 package data
 
 import (
+	"context"
 	"fmt"
+	"time"
 
-	"gorm.io/gorm"
+	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Course struct {
-	Code           int    `gorm:"code"`
-	Title          string `gorm:"title"`
-	DepartmentCode int    `gorm:"department_code"`
-	Description    string `gorm:"description"`
+	ID           primitive.ObjectID `json:"id" bson:"_id"`
+	Title        string             `json:"title" bson:"title"`
+	DepartmentId primitive.ObjectID `json:"department_id" bson:"department_id"`
+	Description  string             `json:"description" bson:"description"`
 }
 
 type CourseData struct {
-	db *gorm.DB
+	Collection *mongo.Collection
 }
 
-func NewCourseData(db *gorm.DB) *CourseData {
-	return &CourseData{db: db}
+func NewCourseData(collection *mongo.Collection) *CourseData {
+	return &CourseData{Collection: collection}
 }
 
-func (c CourseData) Add(course Course) (int, error) {
-	result := c.db.Create(&course)
-	if result.Error != nil {
-		return -1, fmt.Errorf("can't create course, error: %w", result.Error)
+func (u CourseData) Add(course Course) (string, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	_, err := u.Collection.InsertOne(ctx, course)
+	if err != nil {
+		return "-1", fmt.Errorf("can't create course, error: %w", err)
 	}
-	return course.Code, nil
+	return course.ID.String(), nil
 }
 
-func (c CourseData) Read(code int) (Course, error) {
-	var course Course
-	result := c.db.Find(&course, code)
-	if result.Error != nil {
-		return course, fmt.Errorf("can't read course with given id, error: %w", result.Error)
+func (u CourseData) Read(id string) (Course, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.D{{"_id", id}}
+	var result Course
+
+	err := u.Collection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		return result, fmt.Errorf("can't read course with given id, error: %w", err)
 	}
-	return course, nil
+	return result, nil
 }
 
-func (c CourseData) ReadAll() ([]Course, error) {
-	var courses []Course
-	result := c.db.Find(&courses)
-	if result.Error != nil {
-		return nil, fmt.Errorf("can't read courses from database, error: %w", result.Error)
+func (u CourseData) ReadAll() ([]*Course, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.M{}
+	opt := options.Find()
+	var results []*Course
+
+	result, err := u.Collection.Find(ctx, filter, opt)
+	if err != nil {
+		return nil, fmt.Errorf("can't read courses from database, error: %w", err)
 	}
-	return courses, nil
-}
+	defer result.Close(ctx)
 
-func (c CourseData) ChangeDescription(code int, description string) (int, error) {
-	result := c.db.Model(Course{}).Where("code = ?", code).Update("description", description)
-	if result.Error != nil {
-		return -1, fmt.Errorf("can't update course description, error: %w", result.Error)
+	for result.Next(ctx) {
+		var elem Course
+		err := result.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, &elem)
 	}
-	return code, nil
+	if err := result.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return results, nil
 }
 
-func (c CourseData) Delete(code int) error {
-	result := c.db.Delete(&Course{}, code)
-	if result.Error != nil {
-		return fmt.Errorf("can't delete course from database, error: %w", result.Error)
+func (u CourseData) ChangeDescription(id string, description string) (string, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.D{primitive.E{
+		Key:   "_id",
+		Value: id,
+	}}
+	update := bson.D{primitive.E{Key: "$set", Value: bson.D{
+		primitive.E{
+			Key:   "description",
+			Value: description,
+		},
+	}}}
+
+	_, err := u.Collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return "-1", fmt.Errorf("can't update course description, error: %w", err)
+	}
+	return fmt.Sprintf("id: %s, description: %s", id, description), nil
+}
+
+func (u CourseData) Delete(id string) error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.D{{"_id", id}}
+
+	_, err := u.Collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("can't delete course from database, error: %w", err)
 	}
 	return nil
-}
-
-func (c CourseData) GetDepartmentName(code int) (string, error) {
-	var departmentName string
-	result := c.db.Model(&Course{}).
-		Select("departments.name").
-		Joins("join departments on department_code = departments.code").
-		Where("courses.code = ?", code).
-		Scan(&departmentName)
-	if result.Error != nil {
-		return "", fmt.Errorf("can't get department name from database, error: %w", result.Error)
-	}
-	return departmentName, nil
 }
