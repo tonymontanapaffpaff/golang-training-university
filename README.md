@@ -77,6 +77,23 @@ A small application representing CRUD operations on a university database.
 ## How to run  
 1. Specify your database and host data in the configuration file: `/config/home_config.json`
 2. Run application with command: `go run main.go`
+
+
+## Run in a cluster
+
+First you need to create a cluster:
+
+```
+k3d cluster create demo --servers 1 --agents 1 --port 8080:8080/TCP@loadbalancer
+```
+
+Then create all the necessary entities:
+```
+kubectl apply -f ./k3s/mongodb-config.yaml
+```
+
+The server will be aviable on port `8080`. 
+
 ## Unit tests
 ```
 go test -race
