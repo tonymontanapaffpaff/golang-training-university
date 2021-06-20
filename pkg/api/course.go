@@ -34,10 +34,7 @@ func (a courseAPI) getAllCourses(writer http.ResponseWriter, request *http.Reque
 		}
 		return
 	}
-	log.Info("GetAllCourses method result:")
-	for _, value := range courses {
-		log.Info(value)
-	}
+	log.Debugf("GetAllCourses method result: %v", courses)
 	err = json.NewEncoder(writer).Encode(courses)
 	if err != nil {
 		log.Error(err)
@@ -68,7 +65,7 @@ func (a courseAPI) getCourse(writer http.ResponseWriter, request *http.Request) 
 		}
 		return
 	}
-	log.Infof("GetCourse method result: %v", course)
+	log.Debugf("GetCourse method result: %v", course)
 	err = json.NewEncoder(writer).Encode(course)
 	if err != nil {
 		log.Error(err)
@@ -96,7 +93,7 @@ func (a courseAPI) createCourse(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log.Infof("CreateCourse method result: %s", result)
+	log.Debugf("CreateCourse method result: %s", result)
 	writer.WriteHeader(http.StatusCreated)
 }
 
@@ -134,7 +131,7 @@ func (a courseAPI) updateCourseDescription(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log.Infof("UpdateCourseDescription method result: %s", result)
+	log.Debugf("UpdateCourseDescription method result: %s", result)
 	writer.WriteHeader(http.StatusCreated)
 }
 
@@ -156,6 +153,6 @@ func (a courseAPI) deleteCourse(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log.Info("DeleteCourse method successfully done")
+	log.Debug("DeleteCourse method successfully done")
 	writer.WriteHeader(http.StatusCreated)
 }
