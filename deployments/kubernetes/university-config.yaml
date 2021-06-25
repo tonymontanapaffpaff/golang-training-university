@@ -16,11 +16,11 @@ spec:
     spec:
       containers:
       - name: server
-        image: lyyych/k3s-task2-server
+        image: lyyych/deployments-task2-server
         ports:
         - containerPort: 8080
       - name: db
-        image: lyyych/k3s-task2-db
+        image: lyyych/deployments-task2-db
         env:
           - name: MONGO_INITDB_DATABASE
             value: university

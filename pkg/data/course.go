@@ -38,11 +38,12 @@ func (u CourseData) Add(course Course) (string, error) {
 }
 
 func (u CourseData) Read(id string) (Course, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{"_id", objectID}}
 	var result Course
 
-	err := u.Collection.FindOne(ctx, filter).Decode(&result)
+	err = u.Collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		return result, fmt.Errorf("can't read course with given id, error: %w", err)
 	}
@@ -77,10 +78,11 @@ func (u CourseData) ReadAll() ([]*Course, error) {
 }
 
 func (u CourseData) ChangeDescription(id string, description string) (string, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	filter := bson.D{primitive.E{
 		Key:   "_id",
-		Value: id,
+		Value: objectID,
 	}}
 	update := bson.D{primitive.E{Key: "$set", Value: bson.D{
 		primitive.E{
@@ -89,7 +91,7 @@ func (u CourseData) ChangeDescription(id string, description string) (string, er
 		},
 	}}}
 
-	_, err := u.Collection.UpdateOne(ctx, filter, update)
+	_, err = u.Collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return "-1", fmt.Errorf("can't update course description, error: %w", err)
 	}
@@ -97,10 +99,11 @@ func (u CourseData) ChangeDescription(id string, description string) (string, er
 }
 
 func (u CourseData) Delete(id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{"_id", objectID}}
 
-	_, err := u.Collection.DeleteOne(ctx, filter)
+	_, err = u.Collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("can't delete course from database, error: %w", err)
 	}

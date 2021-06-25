@@ -19,8 +19,6 @@ var (
 	serverEndpoint = os.Getenv("SERVER_ENDPOINT")
 	dbHost         = os.Getenv("DB_USERS_HOST")
 	dbPort         = os.Getenv("DB_USERS_PORT")
-	dbUser         = os.Getenv("DB_USERS_USER")
-	dbPassword     = os.Getenv("DB_USERS_PASSWORD")
 )
 
 func init() {
@@ -33,17 +31,11 @@ func init() {
 	if dbPort == "" {
 		dbPort = "27017"
 	}
-	if dbUser == "" {
-		dbUser = "root"
-	}
-	if dbPassword == "" {
-		dbPassword = "root"
-	}
 }
 
 func main() {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := db.GetClient(ctx, dbUser, dbPassword, dbHost, dbPort)
+	client, err := db.GetClient(ctx, dbHost, dbPort)
 	if err != nil {
 		log.Fatal(err)
 	}

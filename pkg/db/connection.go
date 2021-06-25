@@ -8,9 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetClient(ctx context.Context, dbUser, dbPassword, dbHost, dbPort string) (*mongo.Client, error) {
-	//client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-	//	fmt.Sprintf("mongodb://%v:%v@%v:%v/?sslmode=disable", dbUser, dbPassword, dbHost, dbPort)))
+func GetClient(ctx context.Context, dbHost, dbPort string) (*mongo.Client, error) {
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
 		fmt.Sprintf("mongodb://%v:%v", dbHost, dbPort)))
 	if err != nil {

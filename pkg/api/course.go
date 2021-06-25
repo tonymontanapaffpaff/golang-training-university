@@ -14,16 +14,20 @@ type courseAPI struct {
 	data *data.CourseData
 }
 
-func ServeCourseResource(r *mux.Router, data data.CourseData) {
-	api := &courseAPI{data: &data}
-	r.HandleFunc("/courses", api.getAllCourses).Methods("GET")
-	r.HandleFunc("/courses/{id}", api.getCourse).Methods("GET")
-	r.HandleFunc("/courses", api.createCourse).Methods("POST")
-	r.HandleFunc("/courses/{id}", api.updateCourseDescription).Methods("PATCH")
-	r.HandleFunc("/courses/{id}", api.deleteCourse).Methods("DELETE")
+func NewCourseAPI(data *data.CourseData) courseAPI {
+	return courseAPI{data: data}
 }
 
-func (a courseAPI) getAllCourses(writer http.ResponseWriter, request *http.Request) {
+func ServeCourseResource(r *mux.Router, data data.CourseData) {
+	api := &courseAPI{data: &data}
+	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
+	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
+	r.HandleFunc("/courses", api.CreateCourse).Methods("POST")
+	r.HandleFunc("/courses/{id}", api.UpdateCourseDescription).Methods("PATCH")
+	r.HandleFunc("/courses/{id}", api.DeleteCourse).Methods("DELETE")
+}
+
+func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
 	courses, err := a.data.ReadAll()
 	if err != nil {
 		log.Error(err)
@@ -43,7 +47,7 @@ func (a courseAPI) getAllCourses(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
-func (a courseAPI) getCourse(writer http.ResponseWriter, request *http.Request) {
+func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -74,7 +78,7 @@ func (a courseAPI) getCourse(writer http.ResponseWriter, request *http.Request) 
 	}
 }
 
-func (a courseAPI) createCourse(writer http.ResponseWriter, request *http.Request) {
+func (a courseAPI) CreateCourse(writer http.ResponseWriter, request *http.Request) {
 	course := new(data.Course)
 	err := json.NewDecoder(request.Body).Decode(&course)
 	if err != nil {
@@ -101,7 +105,7 @@ type Description struct {
 	Description string `json:"description"`
 }
 
-func (a courseAPI) updateCourseDescription(writer http.ResponseWriter, request *http.Request) {
+func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -135,7 +139,7 @@ func (a courseAPI) updateCourseDescription(writer http.ResponseWriter, request *
 	writer.WriteHeader(http.StatusCreated)
 }
 
-func (a courseAPI) deleteCourse(writer http.ResponseWriter, request *http.Request) {
+func (a courseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
