@@ -75,8 +75,11 @@ A small application representing CRUD operations on a university database.
 </table>
 
 ## How to run  
-1. Specify your database and host data in the configuration file: `/config/home_config.json`
-2. Run application with command: `go run main.go`
+`make up`
+
+## JWT authentication
+Using cURL:
+`curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" https://{hostname}/login`
 
 
 ## Run in a cluster
