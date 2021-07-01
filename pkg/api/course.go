@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/api/middleware"
 	"github.com/tonymontanapaffpaff/golang-training-university/pkg/data"
 
 	"github.com/gorilla/mux"
@@ -14,17 +15,18 @@ type courseAPI struct {
 	data *data.CourseData
 }
 
-func NewCourseAPI(data *data.CourseData) courseAPI {
-	return courseAPI{data: data}
+func NewCourseAPI(data *data.CourseData) *courseAPI {
+	return &courseAPI{data: data}
 }
 
 func ServeCourseResource(r *mux.Router, data data.CourseData) {
 	api := &courseAPI{data: &data}
-	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
-	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
 	r.HandleFunc("/courses", api.CreateCourse).Methods("POST")
 	r.HandleFunc("/courses/{id}", api.UpdateCourseDescription).Methods("PATCH")
 	r.HandleFunc("/courses/{id}", api.DeleteCourse).Methods("DELETE")
+	r.Use(middleware.TokenAuthMiddleware)
+	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
+	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
 }
 
 func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
@@ -91,10 +93,10 @@ func (a courseAPI) CreateCourse(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result, err := a.data.Add(*course)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	result, httpErr := a.data.Add(*course, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debugf("CreateCourse method result: %s", result)
@@ -129,10 +131,10 @@ func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result, err := a.data.ChangeDescription(id, description.Description)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	result, httpErr := a.data.ChangeDescription(id, description.Description, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debugf("UpdateCourseDescription method result: %s", result)
@@ -151,10 +153,10 @@ func (a courseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Reques
 		}
 		return
 	}
-	err := a.data.Delete(id)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	httpErr := a.data.Delete(id, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debug("DeleteCourse method successfully done")

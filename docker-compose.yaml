@@ -5,23 +5,27 @@ services:
     image: lyyych/k3s-task2-db:latest
     restart: always
     environment:
-      - MONGO_INITDB_DATABASE=${DB_NAME}
+      - MONGO_INITDB_DATABASE=university
     ports:
-      - ${DB_PORT}:27017
+      - 27017:27017
     networks:
       - university-network
-  backend:
-    image: lyyych/k3s-task2-server:latest
-    environment:
-      - DB_USERS_HOST=mongo
-      - DB_USERS_PORT=${DB_PORT}
+  redis:
+    image: redis:latest
     ports:
-      - ${SERVER_ENDPOINT}:8080
-    container_name: server
-    depends_on:
-      - mongo
+    - 6379:6379
     networks:
       - university-network
+#  backend:
+#    build: .
+#    ports:
+#      - 8080:8080
+#    container_name: server
+#    depends_on:
+#      - mongo
+#      - redis
+#    networks:
+#      - university-network
 
 networks:
   university-network:
