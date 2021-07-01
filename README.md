@@ -74,12 +74,19 @@ A small application representing CRUD operations on a university database.
 </tr>
 </table>
 
-## How to run  
-`make up`
+## How to run
+Using Make utility:
+```
+make up
+```
 
 ## JWT authentication
 Using cURL:
-`curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" https://{hostname}/login`
+```
+curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" https://{HOSTNAME}/login
+```
+TOKEN - acces token  
+HOSTNAME - server endpoint
 
 
 ## Run in a cluster
