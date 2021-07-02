@@ -21,12 +21,13 @@ func NewCourseAPI(data *data.CourseData) *courseAPI {
 
 func ServeCourseResource(r *mux.Router, data data.CourseData) {
 	api := &courseAPI{data: &data}
-	r.HandleFunc("/courses", api.CreateCourse).Methods("POST")
-	r.HandleFunc("/courses/{id}", api.UpdateCourseDescription).Methods("PATCH")
-	r.HandleFunc("/courses/{id}", api.DeleteCourse).Methods("DELETE")
-	r.Use(middleware.TokenAuthMiddleware)
 	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
 	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
+	subRouter := r.Methods("POST", "PATCH", "DELETE").Subrouter()
+	subRouter.HandleFunc("/courses", api.CreateCourse)
+	subRouter.HandleFunc("/courses/{id}", api.UpdateCourseDescription)
+	subRouter.HandleFunc("/courses/{id}", api.DeleteCourse)
+	subRouter.Use(middleware.TokenAuthMiddleware)
 }
 
 func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {

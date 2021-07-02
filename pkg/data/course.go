@@ -16,7 +16,7 @@ import (
 )
 
 type Course struct {
-	ID           primitive.ObjectID `json:"ID" bson:"_id"`
+	ID           primitive.ObjectID `json:"id" bson:"_id"`
 	Title        string             `json:"title" bson:"title"`
 	DepartmentId primitive.ObjectID `json:"department_id" bson:"department_id"`
 	Description  string             `json:"description" bson:"description"`

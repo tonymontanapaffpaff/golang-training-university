@@ -77,7 +77,7 @@ func verifyToken(r *http.Request) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
+		return []byte(os.Getenv("PUBLIC_KEY")), nil
 	})
 	if err != nil {
 		return nil, err
@@ -96,7 +96,6 @@ func extractToken(r *http.Request) string {
 }
 
 func extract(token *jwt.Token) (*AccessDetails, error) {
-
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		accessUuid, ok := claims["access_uuid"].(string)

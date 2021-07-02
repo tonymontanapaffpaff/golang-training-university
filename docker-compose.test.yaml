@@ -15,7 +15,7 @@ services:
       - DB_USERS_PORT=27017
     ports:
       - 8080:8080
-    container_name: server
+    container_name: backend
     depends_on:
       - mongo
     networks:

@@ -74,7 +74,7 @@ func (d *UserData) Refresh(refreshToken string) (map[string]string, HttpErr) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("REFRESH_SECRET")), nil
+		return []byte(os.Getenv("PRIVATE_KEY")), nil
 	})
 	//if there is an error, the token must have expired
 	if err != nil {

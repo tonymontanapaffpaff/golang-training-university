@@ -15,8 +15,8 @@ spec:
         project: university-api
     spec:
       containers:
-      - name: server
-        image: lyyych/deployments-task2-server
+      - name: backend
+        image: lyyych/deployments-task2-backend
         ports:
         - containerPort: 8080
       - name: db

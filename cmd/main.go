@@ -15,12 +15,32 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
+)
+
+var (
+	dbHost         = os.Getenv("MONGO_HOST")
+	dbPort         = os.Getenv("MONGO_PORT")
+	redisHost      = os.Getenv("REDIS_HOST")
+	redisPort      = os.Getenv("REDIS_PORT")
+	redisPassword  = os.Getenv("REDIS_PASSWORD")
+	serverEndpoint = os.Getenv("SERVER_ENDPOINT")
 )
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+	if dbPort == "" {
+		dbPort = "27017"
+	}
+	if redisHost == "" {
+		redisHost = "localhost"
+	}
+	if redisPort == "" {
+		redisPort = "6379"
+	}
+	if serverEndpoint == "" {
+		serverEndpoint = ":8080"
 	}
 }
 
@@ -34,9 +54,6 @@ func NewRedisDB(host, port, password string) *redis.Client {
 }
 
 func main() {
-	dbHost := os.Getenv("MONGO_HOST")
-	dbPort := os.Getenv("MONGO_PORT")
-
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := db.GetClient(ctx, dbHost, dbPort)
 	if err != nil {
@@ -44,23 +61,17 @@ func main() {
 	}
 	defer client.Disconnect(ctx)
 
-	//redis details
-	redisHost := os.Getenv("REDIS_HOST")
-	redisPort := os.Getenv("REDIS_PORT")
-	redisPassword := os.Getenv("REDIS_PASSWORD")
-
 	redisClient := NewRedisDB(redisHost, redisPort, redisPassword)
 	IAuth := auth.NewAuth(redisClient)
 	IToken := auth.NewToken()
 
 	r := mux.NewRouter()
 	courseData := data.NewCourseData(client.Database("university").Collection("courses"), IAuth, IToken)
-	userData := data.NewCourseData(client.Database("university").Collection("users"), IAuth, IToken)
+	userData := data.NewUserData(client.Database("university").Collection("users"), IAuth, IToken)
 	api.ServeCourseResource(r, *courseData)
-	api.ServeCourseResource(r, *userData)
+	api.ServeUserResource(r, *userData)
 	r.Use(mux.CORSMethodMiddleware(r))
 
-	serverEndpoint := os.Getenv("SERVER_ENDPOINT")
 	listener, err := net.Listen("tcp", serverEndpoint)
 	if err != nil {
 		log.Fatal(err)

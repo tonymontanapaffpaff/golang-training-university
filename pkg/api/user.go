@@ -21,10 +21,11 @@ func NewUserAPI(userData *data.UserData) *userAPI {
 
 func ServeUserResource(r *mux.Router, data data.UserData) {
 	api := &userAPI{data: &data}
-	r.HandleFunc("/logout", api.Logout).Methods("POST")
-	r.Use(middleware.TokenAuthMiddleware)
 	r.HandleFunc("/login", api.Login).Methods("POST")
 	r.HandleFunc("/refresh", api.Refresh).Methods("POST")
+	subRouter := r.Methods("POST").Subrouter()
+	subRouter.HandleFunc("/logout", api.Logout)
+	subRouter.Use(middleware.TokenAuthMiddleware)
 }
 
 func (a *userAPI) Login(writer http.ResponseWriter, request *http.Request) {

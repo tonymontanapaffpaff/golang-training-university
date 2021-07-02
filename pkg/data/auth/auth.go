@@ -37,9 +37,7 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-//Save token metadata to Redis
 func (tk *Service) CreateAuth(userId string, td *TokenDetails) error {
-	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
 	rt := time.Unix(td.RtExpires, 0)
 	now := time.Now()
@@ -58,10 +56,7 @@ func (tk *Service) CreateAuth(userId string, td *TokenDetails) error {
 	return nil
 }
 
-//Check the metadata saved
 func (tk *Service) FetchAuth(tokenUuid string) (string, error) {
-	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
 	userid, err := tk.client.Get(tokenUuid).Result()
 	if err != nil {
 		return "", err
@@ -69,10 +64,7 @@ func (tk *Service) FetchAuth(tokenUuid string) (string, error) {
 	return userid, nil
 }
 
-//Once a user row in the token table
 func (tk *Service) DeleteTokens(authD *AccessDetails) error {
-	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
 	//get the refresh uuid
 	refreshUuid := fmt.Sprintf("%s++%s", authD.TokenUuid, authD.UserId)
 	//delete access token
@@ -93,8 +85,6 @@ func (tk *Service) DeleteTokens(authD *AccessDetails) error {
 }
 
 func (tk *Service) DeleteRefresh(refreshUuid string) error {
-	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
 	//delete refresh token
 	deleted, err := tk.client.Del(refreshUuid).Result()
 	if err != nil || deleted == 0 {
