@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - ${TEST_DB_PORT}:27017
+    networks:
+      - university-network
+  backend:
+    image: lyyych/k3s-task2-server:latest
+    environment:
+      - DB_USERS_HOST=mongo
+      - DB_USERS_PORT=${TEST_DB_PORT}
+    ports:
+      - ${TEST_SERVER_ENDPOINT}:8080
+    container_name: server
+    depends_on:
+      - mongo
+    networks:
+      - university-network
+
+networks:
+  university-network:
+    name: university-network
