@@ -12,7 +12,8 @@ A small application representing CRUD operations on a university database.
 <td>/courses</td>
 <td>GET</td>
 <td>Get all courses</td>
-<td>  
+<td>
+  
 ```json
 [
   {
