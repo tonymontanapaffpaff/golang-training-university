@@ -8,6 +8,9 @@ A small application representing CRUD operations on a university database.
 <td>Description</td>
 <td>Body example</td>
 </tr>
+  
+  
+  
 <tr>
 <td>/courses</td>
 <td>GET</td>
