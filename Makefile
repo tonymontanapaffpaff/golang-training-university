@@ -15,10 +15,10 @@ down:
 
 .PHONY: all test clean
 test:
-	docker-compose -f docker-compose.test.yaml up -d
+	sudo docker-compose -f docker-compose.test.yaml up -d
 	go test ./test
-	docker-compose -f docker-compose.test.yaml stop
-	docker-compose -f docker-compose.test.yaml down
+	sudo docker-compose -f docker-compose.test.yaml stop
+	sudo docker-compose -f docker-compose.test.yaml down
 
 test-db:
 	sudo docker run --rm -p 27017:27017 -e MONGO_INITDB_DATABASE=university lyyych/k3s-task2-db2
