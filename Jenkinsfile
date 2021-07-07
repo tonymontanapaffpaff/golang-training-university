@@ -20,7 +20,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling and building'
-                sh 'go build'
+                sh 'go build ./cmd/main.go'
             }
         }
 
