@@ -2,6 +2,7 @@
 A small application representing CRUD operations on a university database.
 ## Paths table
 <table>
+  
 <tr>
 <td>Path</td>
 <td>Method</td>
