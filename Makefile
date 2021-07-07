@@ -16,7 +16,7 @@ down:
 .PHONY: all test clean
 test:
 	sudo docker-compose -f docker-compose.test.yaml up -d
-	go test ./test
+	go test ./test -tags=integration
 	sudo docker-compose -f docker-compose.test.yaml stop
 	sudo docker-compose -f docker-compose.test.yaml down
 
