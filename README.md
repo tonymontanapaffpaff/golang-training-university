@@ -10,10 +10,6 @@ A small application representing CRUD operations on a university database.
 </tr>  
 <tr>
 <td>/courses</td>
-  
-  
-  
-  
 <td>GET</td>
 <td>Get all courses</td>
 <td>
