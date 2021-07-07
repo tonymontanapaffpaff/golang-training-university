@@ -13,6 +13,7 @@ A small application representing CRUD operations on a university database.
 <td>GET</td>
 <td>Get all courses</td>
 <td>
+  
 ```json
 [
   {
