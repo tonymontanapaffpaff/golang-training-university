@@ -3,7 +3,7 @@ A small application representing CRUD operations on a university database.
 ## Paths table
 <table>
 <tr>
-<td>Path 123</td>
+<td>Path</td>
 <td>Method</td>
 <td>Description</td>
 <td>Body example</td>
