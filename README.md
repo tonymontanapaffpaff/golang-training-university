@@ -1,4 +1,4 @@
-## Description 1
+## Description
 A small application representing CRUD operations on a university database.
 ## Paths table
 <table>
