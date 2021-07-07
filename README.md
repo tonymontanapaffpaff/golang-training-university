@@ -14,6 +14,8 @@ A small application representing CRUD operations on a university database.
 <td>Get all courses</td>
 <td>
   
+  
+  
 ```json
 [
   {
