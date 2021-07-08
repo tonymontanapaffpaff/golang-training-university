@@ -14,6 +14,7 @@ pipeline {
                 echo 'Installing dependencies'
                 sh 'go version'
                 sh 'go get -u golang.org/x/lint/golint'
+                sh 'make mod'
             }
         }
 
