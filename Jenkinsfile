@@ -20,17 +20,19 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling and building'
-                sh 'go build'
+                sh 'go build ./cmd/main.go'
             }
         }
 
         stage('Test') {
             steps {
                 withEnv(["PATH+GO=${GOPATH}/bin"]){
-                    echo 'Running vetting'
-                    sh 'go vet .'
-                    echo 'Running linting'
-                    sh 'golint .'
+                    echo 'Running vet'
+                    sh 'go vet ./...'
+                    echo 'Running fmt'
+                    sh 'go fmt ./...'
+                    echo 'Running linter'
+                    sh 'golint ./...'
                     echo 'Running test'
                     sh 'make test'
                 }
