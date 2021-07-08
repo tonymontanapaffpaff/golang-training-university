@@ -9,7 +9,6 @@ pipeline {
         GOPATH = "${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}"
     }
     stages {
-    stage('Pre Test') {
         stage('Pre Test') {
             steps {
                 echo 'Installing dependencies'
