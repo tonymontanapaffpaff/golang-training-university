@@ -1,4 +1,4 @@
-## Description 1
+## Description
 A small application representing CRUD operations on a university database.
 ## Paths table
 <table>
@@ -7,11 +7,12 @@ A small application representing CRUD operations on a university database.
 <td>Method</td>
 <td>Description</td>
 <td>Body example</td>
-</tr>
+</tr>  
 <tr>
 <td>/courses</td>
 <td>GET</td>
 <td>Get all courses</td>
+  
 <td>
 ```json
 [
