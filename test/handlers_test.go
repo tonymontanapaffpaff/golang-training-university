@@ -111,7 +111,7 @@ func TestHandlePostPage(t *testing.T) {
 	course := data.Course{
 		ID:           primitive.NewObjectID(),
 		Title:        "",
-		DepartmentId: primitive.ObjectID{},
+		DepartmentID: primitive.ObjectID{},
 		Description:  "",
 	}
 
