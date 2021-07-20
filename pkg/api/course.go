@@ -11,16 +11,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type courseAPI struct {
+type CourseAPI struct {
 	data *data.CourseData
 }
 
-func NewCourseAPI(data *data.CourseData) *courseAPI {
-	return &courseAPI{data: data}
+func NewCourseAPI(data *data.CourseData) *CourseAPI {
+	return &CourseAPI{data: data}
 }
 
 func ServeCourseResource(r *mux.Router, data data.CourseData) {
-	api := &courseAPI{data: &data}
+	api := &CourseAPI{data: &data}
 	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
 	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
 	subRouter := r.Methods("POST", "PATCH", "DELETE").Subrouter()
@@ -30,11 +30,11 @@ func ServeCourseResource(r *mux.Router, data data.CourseData) {
 	subRouter.Use(middleware.TokenAuthMiddleware)
 }
 
-func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
 	courses, err := a.data.ReadAll()
 	if err != nil {
 		log.Error(err)
-		_, err := writer.Write([]byte("got an error when tried to get list of courses"))
+		_, err = writer.Write([]byte("got an error when tried to get list of courses"))
 		if err != nil {
 			log.Error(err)
 			writer.WriteHeader(http.StatusInternalServerError)
@@ -50,7 +50,7 @@ func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
-func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -65,7 +65,7 @@ func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) 
 	course, err := a.data.Read(id)
 	if err != nil {
 		log.Error(err)
-		_, err := writer.Write([]byte("got an error when tried to get course"))
+		_, err = writer.Write([]byte("got an error when tried to get course"))
 		if err != nil {
 			log.Error(err)
 			writer.WriteHeader(http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) 
 	}
 }
 
-func (a courseAPI) CreateCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) CreateCourse(writer http.ResponseWriter, request *http.Request) {
 	course := new(data.Course)
 	err := json.NewDecoder(request.Body).Decode(&course)
 	if err != nil {
@@ -108,7 +108,7 @@ type Description struct {
 	Description string `json:"description"`
 }
 
-func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -142,7 +142,7 @@ func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *
 	writer.WriteHeader(http.StatusCreated)
 }
 
-func (a courseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {

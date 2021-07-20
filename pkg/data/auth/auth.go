@@ -65,19 +65,19 @@ func (tk *Service) FetchAuth(tokenUuid string) (string, error) {
 }
 
 func (tk *Service) DeleteTokens(authD *AccessDetails) error {
-	//get the refresh uuid
+	// get the refresh uuid
 	refreshUuid := fmt.Sprintf("%s++%s", authD.TokenUuid, authD.UserId)
-	//delete access token
+	// delete access token
 	deletedAt, err := tk.client.Del(authD.TokenUuid).Result()
 	if err != nil {
 		return err
 	}
-	//delete refresh token
+	// delete refresh token
 	deletedRt, err := tk.client.Del(refreshUuid).Result()
 	if err != nil {
 		return err
 	}
-	//When the record is deleted, the return value is 1
+	// when the record is deleted, the return value is 1
 	if deletedAt != 1 || deletedRt != 1 {
 		return errors.New("something went wrong")
 	}
@@ -85,7 +85,7 @@ func (tk *Service) DeleteTokens(authD *AccessDetails) error {
 }
 
 func (tk *Service) DeleteRefresh(refreshUuid string) error {
-	//delete refresh token
+	// delete refresh token
 	deleted, err := tk.client.Del(refreshUuid).Result()
 	if err != nil || deleted == 0 {
 		return err

@@ -40,7 +40,7 @@ func (d *UserData) Login(user User) (map[string]string, error) {
 		return nil, fmt.Errorf("can't get user with given ID, error: %w", err)
 	}
 
-	//compare the user from the request, with the one we defined:
+	// compare the user from the request, with the one we defined:
 	if user.Password != result.Password {
 		return nil, fmt.Errorf("please provide valid login details")
 	}
@@ -60,7 +60,7 @@ func (d *UserData) Login(user User) (map[string]string, error) {
 }
 
 func (d *UserData) Logout(req *http.Request) error {
-	//If metadata is passed and the tokens valid, delete them from the redis store
+	// if metadata is passed and the tokens valid, delete them from the redis store
 	metadata, _ := d.IToken.ExtractTokenMetadata(req)
 	if metadata != nil {
 		return d.IAuth.DeleteTokens(metadata)
@@ -69,30 +69,30 @@ func (d *UserData) Logout(req *http.Request) error {
 }
 
 func (d *UserData) Refresh(refreshToken string) (map[string]string, HttpErr) {
-	//verify the token
+	// verify the token
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("PRIVATE_KEY")), nil
 	})
-	//if there is an error, the token must have expired
+	// if there is an error, the token must have expired
 	if err != nil {
 		return nil, HttpErr{
 			Err:        fmt.Errorf("refresh token expired"),
 			StatusCode: http.StatusUnauthorized,
 		}
 	}
-	//is token valid?
+	// check is token valid
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
 		return nil, HttpErr{
 			StatusCode: http.StatusUnauthorized,
 		}
 	}
-	//Since token is valid, get the uuid:
-	claims, ok := token.Claims.(jwt.MapClaims) //the token claims should conform to MapClaims
+	// since token is valid, get the uuid
+	claims, ok := token.Claims.(jwt.MapClaims) // the token claims should conform to MapClaims
 	if ok && token.Valid {
-		refreshUuid, ok := claims["refresh_uuid"].(string) //convert the interface to string
+		refreshUuid, ok := claims["refresh_uuid"].(string) // convert the interface to string
 		if !ok {
 			return nil, HttpErr{
 				Err:        fmt.Errorf("unauthorized"),
@@ -106,7 +106,7 @@ func (d *UserData) Refresh(refreshToken string) (map[string]string, HttpErr) {
 				StatusCode: http.StatusUnprocessableEntity,
 			}
 		}
-		//Delete the previous Refresh Token
+		// delete the previous Refresh Token
 		delErr := d.IAuth.DeleteRefresh(refreshUuid)
 		if delErr != nil { //if any goes wrong
 			return nil, HttpErr{
@@ -114,7 +114,7 @@ func (d *UserData) Refresh(refreshToken string) (map[string]string, HttpErr) {
 				StatusCode: http.StatusUnauthorized,
 			}
 		}
-		//Create new pairs of refresh and access tokens
+		// create new pairs of refresh and access tokens
 		ts, createErr := d.IToken.CreateToken(userId)
 		if createErr != nil {
 			return nil, HttpErr{
@@ -122,7 +122,7 @@ func (d *UserData) Refresh(refreshToken string) (map[string]string, HttpErr) {
 				StatusCode: http.StatusForbidden,
 			}
 		}
-		//save the tokens metadata to redis
+		// save the tokens metadata to redis
 		saveErr := d.IAuth.CreateAuth(userId, ts)
 		if saveErr != nil {
 			return nil, HttpErr{

@@ -11,16 +11,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type userAPI struct {
+type UserAPI struct {
 	data *data.UserData
 }
 
-func NewUserAPI(userData *data.UserData) *userAPI {
-	return &userAPI{data: userData}
+func NewUserAPI(userData *data.UserData) *UserAPI {
+	return &UserAPI{data: userData}
 }
 
 func ServeUserResource(r *mux.Router, data data.UserData) {
-	api := &userAPI{data: &data}
+	api := &UserAPI{data: &data}
 	r.HandleFunc("/login", api.Login).Methods("POST")
 	r.HandleFunc("/refresh", api.Refresh).Methods("POST")
 	subRouter := r.Methods("POST").Subrouter()
@@ -28,46 +28,47 @@ func ServeUserResource(r *mux.Router, data data.UserData) {
 	subRouter.Use(middleware.TokenAuthMiddleware)
 }
 
-func (a *userAPI) Login(writer http.ResponseWriter, request *http.Request) {
+func (a *UserAPI) Login(writer http.ResponseWriter, request *http.Request) {
 	var user data.User
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
-		log.Errorf("failed reading JSON: %s", err)
-		writer.WriteHeader(http.StatusUnprocessableEntity)
+		log.Errorf("Failed reading JSON, err: %v", err)
+		writer.WriteHeader(http.StatusBadRequest)
 		_, err = writer.Write([]byte("Invalid json provided"))
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Failed sending message to the page, err: %v", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
 	tokens, err := a.data.Login(user)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Login failed, err: %v", err)
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	jsonString, err := json.Marshal(tokens)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed marshalling JSON, err: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	writer.WriteHeader(http.StatusOK)
 	_, err = writer.Write(jsonString)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed sending message to the page, err: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func (a *userAPI) Logout(writer http.ResponseWriter, request *http.Request) {
+func (a *UserAPI) Logout(writer http.ResponseWriter, request *http.Request) {
 	err := a.data.Logout(request)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		_, err := writer.Write([]byte(err.Error()))
+		_, err = writer.Write([]byte(err.Error()))
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Failed sending message to the page, err: %v", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -75,21 +76,21 @@ func (a *userAPI) Logout(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusOK)
 	_, err = writer.Write([]byte("Successfully logged out"))
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed sending message to the page, err: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func (a *userAPI) Refresh(writer http.ResponseWriter, request *http.Request) {
+func (a *UserAPI) Refresh(writer http.ResponseWriter, request *http.Request) {
 	mapToken := make(map[string]string)
 	err := json.NewDecoder(request.Body).Decode(&mapToken)
 	if err != nil {
-		log.Errorf("failed reading JSON: %s", err)
+		log.Errorf("Failed reading JSON, err: %v", err)
 		writer.WriteHeader(http.StatusUnprocessableEntity)
 		_, err = writer.Write([]byte("Invalid json provided"))
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Failed sending message to the page, err: %v", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -98,23 +99,23 @@ func (a *userAPI) Refresh(writer http.ResponseWriter, request *http.Request) {
 	newPair, refreshErr := a.data.Refresh(refreshToken)
 	if refreshErr.Err != nil {
 		writer.WriteHeader(refreshErr.StatusCode)
-		_, err := writer.Write([]byte(refreshErr.Err.Error()))
+		_, err = writer.Write([]byte(refreshErr.Err.Error()))
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Failed sending message to the page, err: %v", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
 	jsonString, err := json.Marshal(newPair)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed reading JSON, err: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	writer.WriteHeader(http.StatusCreated)
 	_, err = writer.Write(jsonString)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed sending message to the page, err: %v", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}

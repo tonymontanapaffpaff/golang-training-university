@@ -32,7 +32,7 @@ func (t *TokenService) CreateToken(userId string) (*TokenDetails, error) {
 	td.RefreshUuid = td.TokenUuid + "++" + userId
 
 	var err error
-	//Creating Access Token
+	// creating Access Token
 	atClaims := jwt.MapClaims{}
 	atClaims["access_uuid"] = td.TokenUuid
 	atClaims["user_id"] = userId
@@ -43,7 +43,7 @@ func (t *TokenService) CreateToken(userId string) (*TokenDetails, error) {
 		return nil, err
 	}
 
-	//Creating Refresh Token
+	// creating Refresh Token
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
 	td.RefreshUuid = td.TokenUuid + "++" + userId
 
@@ -85,7 +85,7 @@ func verifyToken(r *http.Request) (*jwt.Token, error) {
 	return token, nil
 }
 
-//get the token from the request body
+// get the token from the request body
 func extractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
