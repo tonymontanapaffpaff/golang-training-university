@@ -1,3 +1,5 @@
+// +build integration
+
 package test
 
 import (
@@ -18,19 +20,19 @@ var courses = map[string]data.Course{
 	"First course": {
 		ID:           primitive.NewObjectID(),
 		Title:        "First course title",
-		DepartmentId: primitive.ObjectID{},
+		DepartmentID: primitive.ObjectID{},
 		Description:  "",
 	},
 	"Second course": {
 		ID:           primitive.NewObjectID(),
 		Title:        "Second course title",
-		DepartmentId: primitive.ObjectID{},
+		DepartmentID: primitive.ObjectID{},
 		Description:  "",
 	},
 	"Third course": {
 		ID:           primitive.NewObjectID(),
 		Title:        "Third course title",
-		DepartmentId: primitive.ObjectID{},
+		DepartmentID: primitive.ObjectID{},
 		Description:  "",
 	},
 }
