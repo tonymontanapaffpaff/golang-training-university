@@ -1216,40 +1216,6 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 			return nil, EINVAL
 		}
 	}
-
-		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
-
-		switch proto {
-		case CAN_J1939:
-			sa := &SockaddrCANJ1939{
-				Ifindex: int(pp.Ifindex),
-			}
-			name := (*[8]byte)(unsafe.Pointer(&sa.Name))
-			for i := 0; i < 8; i++ {
-				name[i] = pp.Addr[i]
-			}
-			pgn := (*[4]byte)(unsafe.Pointer(&sa.PGN))
-			for i := 0; i < 4; i++ {
-				pgn[i] = pp.Addr[i+8]
-			}
-			addr := (*[1]byte)(unsafe.Pointer(&sa.Addr))
-			addr[0] = pp.Addr[12]
-			return sa, nil
-		default:
-			sa := &SockaddrCAN{
-				Ifindex: int(pp.Ifindex),
-			}
-			rx := (*[4]byte)(unsafe.Pointer(&sa.RxID))
-			for i := 0; i < 4; i++ {
-				rx[i] = pp.Addr[i]
-			}
-			tx := (*[4]byte)(unsafe.Pointer(&sa.TxID))
-			for i := 0; i < 4; i++ {
-				tx[i] = pp.Addr[i+4]
-			}
-			return sa, nil
-		}
-	}
 	return nil, EAFNOSUPPORT
 }
 
