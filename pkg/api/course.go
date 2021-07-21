@@ -4,34 +4,37 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/tonymontanapaffpaff/golang-training-university/pkg/api/middleware"
 	"github.com/tonymontanapaffpaff/golang-training-university/pkg/data"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
-type courseAPI struct {
+type CourseAPI struct {
 	data *data.CourseData
 }
 
-func NewCourseAPI(data *data.CourseData) courseAPI {
-	return courseAPI{data: data}
+func NewCourseAPI(data *data.CourseData) *CourseAPI {
+	return &CourseAPI{data: data}
 }
 
 func ServeCourseResource(r *mux.Router, data data.CourseData) {
-	api := &courseAPI{data: &data}
-	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
+	api := &CourseAPI{data: &data}
 	r.HandleFunc("/courses/{id}", api.GetCourse).Methods("GET")
-	r.HandleFunc("/courses", api.CreateCourse).Methods("POST")
-	r.HandleFunc("/courses/{id}", api.UpdateCourseDescription).Methods("PATCH")
-	r.HandleFunc("/courses/{id}", api.DeleteCourse).Methods("DELETE")
+	r.HandleFunc("/courses", api.GetAllCourses).Methods("GET")
+	subRouter := r.Methods("POST", "PATCH", "DELETE").Subrouter()
+	subRouter.HandleFunc("/courses", api.CreateCourse)
+	subRouter.HandleFunc("/courses/{id}", api.UpdateCourseDescription)
+	subRouter.HandleFunc("/courses/{id}", api.DeleteCourse)
+	subRouter.Use(middleware.TokenAuthMiddleware)
 }
 
-func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Request) {
 	courses, err := a.data.ReadAll()
 	if err != nil {
 		log.Error(err)
-		_, err := writer.Write([]byte("got an error when tried to get list of courses"))
+		_, err = writer.Write([]byte("got an error when tried to get list of courses"))
 		if err != nil {
 			log.Error(err)
 			writer.WriteHeader(http.StatusInternalServerError)
@@ -47,7 +50,7 @@ func (a courseAPI) GetAllCourses(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
-func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -62,7 +65,7 @@ func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) 
 	course, err := a.data.Read(id)
 	if err != nil {
 		log.Error(err)
-		_, err := writer.Write([]byte("got an error when tried to get course"))
+		_, err = writer.Write([]byte("got an error when tried to get course"))
 		if err != nil {
 			log.Error(err)
 			writer.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +81,7 @@ func (a courseAPI) GetCourse(writer http.ResponseWriter, request *http.Request) 
 	}
 }
 
-func (a courseAPI) CreateCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) CreateCourse(writer http.ResponseWriter, request *http.Request) {
 	course := new(data.Course)
 	err := json.NewDecoder(request.Body).Decode(&course)
 	if err != nil {
@@ -91,10 +94,10 @@ func (a courseAPI) CreateCourse(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result, err := a.data.Add(*course)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	result, httpErr := a.data.Add(*course, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debugf("CreateCourse method result: %s", result)
@@ -105,7 +108,7 @@ type Description struct {
 	Description string `json:"description"`
 }
 
-func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -129,17 +132,17 @@ func (a courseAPI) UpdateCourseDescription(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result, err := a.data.ChangeDescription(id, description.Description)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	result, httpErr := a.data.ChangeDescription(id, description.Description, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debugf("UpdateCourseDescription method result: %s", result)
 	writer.WriteHeader(http.StatusCreated)
 }
 
-func (a courseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Request) {
+func (a CourseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
 	if len(id) > 24 {
@@ -151,10 +154,10 @@ func (a courseAPI) DeleteCourse(writer http.ResponseWriter, request *http.Reques
 		}
 		return
 	}
-	err := a.data.Delete(id)
-	if err != nil {
-		log.Error(err)
-		writer.WriteHeader(http.StatusBadRequest)
+	httpErr := a.data.Delete(id, request)
+	if httpErr.Err != nil {
+		log.Error(httpErr.Err.Error())
+		writer.WriteHeader(httpErr.StatusCode)
 		return
 	}
 	log.Debug("DeleteCourse method successfully done")

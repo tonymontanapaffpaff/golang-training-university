@@ -2,24 +2,37 @@ version: '3.3'
 
 services:
   mongo:
-    image: lyyych/k3s-task2-db:latest
+    image: lyyych/jwt-task-mongo:latest
     restart: always
     environment:
-      - MONGO_INITDB_DATABASE=${DB_NAME}
+      - MONGO_INITDB_DATABASE=university
     ports:
-      - ${DB_PORT}:27017
+      - ${MONGO_PORT}:27017
+    networks:
+      - university-network
+  redis:
+    image: redis:latest
+    ports:
+    - ${REDIS_PORT}:6379
     networks:
       - university-network
   backend:
-    image: lyyych/k3s-task2-server:latest
+    image: lyyych/jwt-task-backend:latest
     environment:
-      - DB_USERS_HOST=mongo
-      - DB_USERS_PORT=${DB_PORT}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SERVER_ENDPOINT=:${SERVER_ENDPOINT}
+      - PUBLIC_KEY=${PUBLIC_KEY}
+      - PRIVATE_KEY=${PRIVATE_KEY}
     ports:
       - ${SERVER_ENDPOINT}:8080
-    container_name: server
+    container_name: backend
     depends_on:
       - mongo
+      - redis
     networks:
       - university-network
 

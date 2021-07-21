@@ -904,6 +904,46 @@ func (sa *SockaddrIUCV) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrIUCV, nil
 }
 
+type SockaddrNFC struct {
+	DeviceIdx   uint32
+	TargetIdx   uint32
+	NFCProtocol uint32
+	raw         RawSockaddrNFC
+}
+
+func (sa *SockaddrNFC) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	sa.raw.Sa_family = AF_NFC
+	sa.raw.Dev_idx = sa.DeviceIdx
+	sa.raw.Target_idx = sa.TargetIdx
+	sa.raw.Nfc_protocol = sa.NFCProtocol
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrNFC, nil
+}
+
+type SockaddrNFCLLCP struct {
+	DeviceIdx      uint32
+	TargetIdx      uint32
+	NFCProtocol    uint32
+	DestinationSAP uint8
+	SourceSAP      uint8
+	ServiceName    string
+	raw            RawSockaddrNFCLLCP
+}
+
+func (sa *SockaddrNFCLLCP) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	sa.raw.Sa_family = AF_NFC
+	sa.raw.Dev_idx = sa.DeviceIdx
+	sa.raw.Target_idx = sa.TargetIdx
+	sa.raw.Nfc_protocol = sa.NFCProtocol
+	sa.raw.Dsap = sa.DestinationSAP
+	sa.raw.Ssap = sa.SourceSAP
+	if len(sa.ServiceName) > len(sa.raw.Service_name) {
+		return nil, 0, EINVAL
+	}
+	copy(sa.raw.Service_name[:], sa.ServiceName)
+	sa.raw.SetServiceNameLen(len(sa.ServiceName))
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrNFCLLCP, nil
+}
+
 var socketProtocol = func(fd int) (int, error) {
 	return GetsockoptInt(fd, SOL_SOCKET, SO_PROTOCOL)
 }
@@ -1111,6 +1151,71 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
+
+		switch proto {
+		case CAN_J1939:
+			sa := &SockaddrCANJ1939{
+				Ifindex: int(pp.Ifindex),
+			}
+			name := (*[8]byte)(unsafe.Pointer(&sa.Name))
+			for i := 0; i < 8; i++ {
+				name[i] = pp.Addr[i]
+			}
+			pgn := (*[4]byte)(unsafe.Pointer(&sa.PGN))
+			for i := 0; i < 4; i++ {
+				pgn[i] = pp.Addr[i+8]
+			}
+			addr := (*[1]byte)(unsafe.Pointer(&sa.Addr))
+			addr[0] = pp.Addr[12]
+			return sa, nil
+		default:
+			sa := &SockaddrCAN{
+				Ifindex: int(pp.Ifindex),
+			}
+			rx := (*[4]byte)(unsafe.Pointer(&sa.RxID))
+			for i := 0; i < 4; i++ {
+				rx[i] = pp.Addr[i]
+			}
+			tx := (*[4]byte)(unsafe.Pointer(&sa.TxID))
+			for i := 0; i < 4; i++ {
+				tx[i] = pp.Addr[i+4]
+			}
+			return sa, nil
+		}
+	case AF_NFC:
+		proto, err := socketProtocol(fd)
+		if err != nil {
+			return nil, err
+		}
+		switch proto {
+		case NFC_SOCKPROTO_RAW:
+			pp := (*RawSockaddrNFC)(unsafe.Pointer(rsa))
+			sa := &SockaddrNFC{
+				DeviceIdx:   pp.Dev_idx,
+				TargetIdx:   pp.Target_idx,
+				NFCProtocol: pp.Nfc_protocol,
+			}
+			return sa, nil
+		case NFC_SOCKPROTO_LLCP:
+			pp := (*RawSockaddrNFCLLCP)(unsafe.Pointer(rsa))
+			if uint64(pp.Service_name_len) > uint64(len(pp.Service_name)) {
+				return nil, EINVAL
+			}
+			sa := &SockaddrNFCLLCP{
+				DeviceIdx:      pp.Dev_idx,
+				TargetIdx:      pp.Target_idx,
+				NFCProtocol:    pp.Nfc_protocol,
+				DestinationSAP: pp.Dsap,
+				SourceSAP:      pp.Ssap,
+				ServiceName:    string(pp.Service_name[:pp.Service_name_len]),
+			}
+			return sa, nil
+		default:
+			return nil, EINVAL
+		}
+	}
 
 		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
 
