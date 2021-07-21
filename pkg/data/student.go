@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -72,7 +73,10 @@ func notePayment(tx *gorm.DB, studentId, courseId int, passed bool) error {
 }
 
 func (d StudentData) Pay(studentId, courseId, payment int) error {
-	tx := d.db.Begin()
+	tx := d.db.Begin(&sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  false,
+	})
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
